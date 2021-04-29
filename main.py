@@ -47,16 +47,18 @@ if args.train:
     Gndata, Gmu, Gstd = func._nor(Gdata, train=True)
     Cndata, Cmu, Cstd = func._nor(Cdata, train=True)
 
-    Gmodel = linear_model.Lasso(alpha=1e-2)
-    Cmodel = linear_model.Lasso(alpha=1e-2)
+    Gmodel = linear_model.Lasso(alpha=1e-2, positive=True)
+    Cmodel = linear_model.ElasticNet(alpha=1e-4, positive=True)
     Gmodel.fit(Gndata, Glabel)
     Cmodel.fit(Cndata, Clabel)
 
 
-    #%% pred
-    GVal = np.array(pd.read_csv(args.generation, header=None))[1:,1:]
+    #%% val pred
+    Cp = './sample_data/consumption_org.csv'
+    Gp = './sample_data/generation_org.csv'
+    GVal = np.array(pd.read_csv(Gp, header=None))[1:,1:]
     GVal = np.stack(GVal).astype(None)[:,0]
-    CVal = np.array(pd.read_csv(args.consumption, header=None))[1:,1:]
+    CVal = np.array(pd.read_csv(Cp, header=None))[1:,1:]
     CVal = np.stack(CVal).astype(None)[:,0]    
     GVdata, CVdata = func._pack(GVal), func._pack(CVal)
     GVlabel, CVlabel = func._label(GVal), func._label(CVal)
@@ -68,12 +70,12 @@ if args.train:
     Cpred = Cmodel.predict(CnVdata)
 
     #%%
-    fig, ax = plt.subplots(1, 1, figsize = (15,5))
-    ax.plot(Gpred, color='dodgerblue', label='Pred')
-    ax.plot(GVlabel, color='darkorange', label='Label')
-    ax.legend(fontsize=10, loc=4)
-    plt.title('Generation', fontsize=30) 
-    plt.tight_layout()
+    # fig, ax = plt.subplots(1, 1, figsize = (15,5))
+    # ax.plot(Gpred, color='dodgerblue', label='Pred')
+    # ax.plot(GVlabel, color='darkorange', label='Label')
+    # ax.legend(fontsize=10, loc=4)
+    # plt.title('Generation', fontsize=30) 
+    # plt.tight_layout()
 
     fig, ax = plt.subplots(1, 1, figsize = (15,5))
     ax.plot(Cpred, color='dodgerblue', label='Pred')
