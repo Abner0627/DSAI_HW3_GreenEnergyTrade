@@ -15,3 +15,12 @@ def _pack(x, day=7):
 
 def _label(x, day=7):
     return x[day:]
+
+def _nor(x, x_mean=None, x_std=None, train=False):
+    if train:
+        x_mean = np.mean(x)
+        x_std = np.std(x)
+        x_nor = (x-x_mean) / x_std
+    else:
+        x_nor = (x-x_mean) / x_std
+    return x_nor, x_mean, x_std
