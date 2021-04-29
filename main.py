@@ -74,7 +74,6 @@ if args.train:
     ax.legend(fontsize=10, loc=4)
     plt.title('Generation', fontsize=30) 
     plt.tight_layout()
-    plt.savefig('G_' + str(alp))
 
     fig, ax = plt.subplots(1, 1, figsize = (15,5))
     ax.plot(Cpred, color='dodgerblue', label='Pred')
@@ -82,8 +81,7 @@ if args.train:
     ax.legend(fontsize=10, loc=4)
     plt.title('Consumption', fontsize=30) 
     plt.tight_layout()
-    plt.savefig('C_' + str(alp))
-    # plt.show()    
+    plt.show()    
    
 
     
