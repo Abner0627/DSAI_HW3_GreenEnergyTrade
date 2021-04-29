@@ -47,8 +47,8 @@ if args.train:
     Gndata, Gmu, Gstd = func._nor(Gdata, train=True)
     Cndata, Cmu, Cstd = func._nor(Cdata, train=True)
 
-    Gmodel = linear_model.Lasso(alpha=0.01)
-    Cmodel = linear_model.Lasso(alpha=0.001)
+    Gmodel = linear_model.Lasso(alpha=1e-2)
+    Cmodel = linear_model.Lasso(alpha=1e-2)
     Gmodel.fit(Gndata, Glabel)
     Cmodel.fit(Cndata, Clabel)
 
