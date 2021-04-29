@@ -43,48 +43,47 @@ if args.train:
         else:
             Gdata, Cdata = np.concatenate((Gdata, gen_data)), np.concatenate((Cdata, con_data))
             Glabel, Clabel = np.concatenate((Glabel, gen_label)), np.concatenate((Clabel, con_label))
-    alpha=[0.01, 0.1, 0.5, 1, 5, 7, 10, 30, 100, 200]
-    for n, alp in enumerate(alpha):
-        Gndata, Gmu, Gstd = func._nor(Gdata, train=True)
-        Cndata, Cmu, Cstd = func._nor(Cdata, train=True)
 
-        Gmodel = linear_model.Lasso(alpha=alp)
-        Cmodel = linear_model.Lasso(alpha=alp)
-        Gmodel.fit(Gndata, Glabel)
-        Cmodel.fit(Cndata, Clabel)
+    Gndata, Gmu, Gstd = func._nor(Gdata, train=True)
+    Cndata, Cmu, Cstd = func._nor(Cdata, train=True)
+
+    Gmodel = linear_model.Lasso(alpha=0.01)
+    Cmodel = linear_model.Lasso(alpha=0.001)
+    Gmodel.fit(Gndata, Glabel)
+    Cmodel.fit(Cndata, Clabel)
 
 
-        #%% pred
-        GVal = np.array(pd.read_csv(args.generation, header=None))[1:,1:]
-        GVal = np.stack(GVal).astype(None)[:,0]
-        CVal = np.array(pd.read_csv(args.consumption, header=None))[1:,1:]
-        CVal = np.stack(CVal).astype(None)[:,0]    
-        GVdata, CVdata = func._pack(GVal), func._pack(CVal)
-        GVlabel, CVlabel = func._label(GVal), func._label(CVal)
+    #%% pred
+    GVal = np.array(pd.read_csv(args.generation, header=None))[1:,1:]
+    GVal = np.stack(GVal).astype(None)[:,0]
+    CVal = np.array(pd.read_csv(args.consumption, header=None))[1:,1:]
+    CVal = np.stack(CVal).astype(None)[:,0]    
+    GVdata, CVdata = func._pack(GVal), func._pack(CVal)
+    GVlabel, CVlabel = func._label(GVal), func._label(CVal)
 
-        GnVdata, _, _ = func._nor(GVdata, Gmu, Gstd)
-        CnVdata, _, _ = func._nor(CVdata, Cmu, Cstd)
+    GnVdata, _, _ = func._nor(GVdata, Gmu, Gstd)
+    CnVdata, _, _ = func._nor(CVdata, Cmu, Cstd)
 
-        Gpred = Gmodel.predict(GnVdata)
-        Cpred = Cmodel.predict(CnVdata)
+    Gpred = Gmodel.predict(GnVdata)
+    Cpred = Cmodel.predict(CnVdata)
 
-        #%%
-        fig, ax = plt.subplots(1, 1, figsize = (15,5))
-        ax.plot(Gpred, color='dodgerblue', label='Pred')
-        ax.plot(GVlabel, color='darkorange', label='Label')
-        ax.legend(fontsize=10, loc=4)
-        plt.title('Generation', fontsize=30) 
-        plt.tight_layout()
-        plt.savefig('G_' + str(alp) + '.png')
+    #%%
+    fig, ax = plt.subplots(1, 1, figsize = (15,5))
+    ax.plot(Gpred, color='dodgerblue', label='Pred')
+    ax.plot(GVlabel, color='darkorange', label='Label')
+    ax.legend(fontsize=10, loc=4)
+    plt.title('Generation', fontsize=30) 
+    plt.tight_layout()
+    plt.savefig('G_' + str(alp))
 
-        fig, ax = plt.subplots(1, 1, figsize = (15,5))
-        ax.plot(Cpred, color='dodgerblue', label='Pred')
-        ax.plot(CVlabel, color='darkorange', label='Label')
-        ax.legend(fontsize=10, loc=4)
-        plt.title('Consumption', fontsize=30) 
-        plt.tight_layout()
-        plt.savefig('C_' + str(alp) + '.png')
-        # plt.show()    
+    fig, ax = plt.subplots(1, 1, figsize = (15,5))
+    ax.plot(Cpred, color='dodgerblue', label='Pred')
+    ax.plot(CVlabel, color='darkorange', label='Label')
+    ax.legend(fontsize=10, loc=4)
+    plt.title('Consumption', fontsize=30) 
+    plt.tight_layout()
+    plt.savefig('C_' + str(alp))
+    # plt.show()    
    
 
     
