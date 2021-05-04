@@ -20,8 +20,9 @@ import pandas as pd
 import os
 import matplotlib.pyplot as plt
 import joblib
-from sklearn import linear_model
+import tensorflow.keras as keras
 import func
+import model
 
 
 #%% Load
@@ -56,12 +57,17 @@ if args.train:
     Glabel = np.vstack(Glabel)
     Clabel = np.vstack(Clabel)    
     
-    Gmodel = linear_model.Lasso(alpha=1e-2, positive=True)
-    Cmodel = linear_model.ElasticNet(alpha=1e-4, positive=True) 
-    Gmodel.fit(Gdata, Glabel)
-    Cmodel.fit(Cdata, Clabel)
-    joblib.dump(Gmodel, 'Gmodel')
-    joblib.dump(Cmodel, 'Cmodel')
+    Gmodel = model.m01(24)
+    Cmodel = model.m01(24)
+    optim = keras.optimizers.Adam(learning_rate=1e-4)
+
+    Gmodel.compile(optimizer=optim, loss='mse')
+    Cmodel.compile(optimizer=optim, loss='mse')
+
+    Gmodel.fit(Gndata, Glabel, batch_size=32, epochs=30, verbose=2, shuffle=True)
+    Cmodel.fit(Cndata, Clabel, batch_size=32, epochs=30, verbose=2, shuffle=True)
+
+
 
 else:
 #%% val pred
