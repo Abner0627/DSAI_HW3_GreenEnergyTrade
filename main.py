@@ -59,7 +59,7 @@ if args.train:
     
     Gmodel = model.m01(24)
     Cmodel = model.m01(24)
-    optim = tf.keras.optimizers.Adam(learning_rate=1e-4)
+    optim = keras.optimizers.Adam(learning_rate=1e-4)
 
     Gmodel.compile(optimizer=optim, loss=keras.losses.mean_squared_error())
     Cmodel.compile(optimizer=optim, loss=keras.losses.mean_squared_error())
