@@ -1,29 +1,31 @@
 import numpy as np
 
-def _pack(x, day=7):
+def _pack(x, win=7*24):
     leng = len(x)
     for i in range(leng):
-        if i+day>leng:
+        if i+win>leng:
             break
         else:
-            wind = (x[i:i+day])[np.newaxis, :]
+            wind = (x[i:i+win])[np.newaxis, :]
             if i==0:
                 out = wind
             else:
                 out = np.concatenate((out, wind))
-    return out[:-1,:]
+    return out
 
-def _label(x, day=7):
-    return x[day:]
 
-def _nor(x, x_mean=None, x_std=None, train=False):
-    if train:
-        x_mean = np.mean(x)
-        x_std = np.std(x)
-        x_nor = (x-x_mean) / x_std
-    else:
-        x_nor = (x-x_mean) / x_std
-    return x_nor, x_mean, x_std
+def _norm(x, Z=True):
+    x_n = np.zeros_like(x)
+    for i in range(x.shape[0]):
+        x_mu = np.mean(x[i,:], axis=0)
+        if Z:
+            x_std = np.std(x[i,:], axis=0)
+            x_n[i,:] = (x[i,:]-x_mu)/x_std
+        else:
+            x_min = np.min(x[i,:], axis=0)
+            x_max = np.max(x[i,:], axis=0)
+            x_n[i,:] = (x[i,:]-x_mu)/(x_max-x_min)
+    return x_n
 
 def _comp(GVal, CVal):
     if GVal>CVal:
