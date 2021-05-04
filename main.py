@@ -28,6 +28,7 @@ import func
 if args.train:
     dpath = './training_data'
     data_list = os.listdir(dpath)
+    Gdata, Cdata, Glabel, Clabel = [], [], [], []
     for i in range(len(data_list)):
     # i=0
         data_ag = np.array(pd.read_csv(os.path.join(dpath, data_list[i]), header=None))[1:,1:]
@@ -36,15 +37,25 @@ if args.train:
         gen_data, con_data = func._pack(gen)[:-24, :], func._pack(con)[:-24, :]
         gen_label, con_label = func._pack(gen[7*24:], win=24), func._pack(con[7*24:], win=24)
 
-        if i==0:
-            Gdata, Cdata = gen_data, con_data
-            Glabel, Clabel = gen_label, con_label
-        else:
-            Gdata, Cdata = np.concatenate((Gdata, gen_data)), np.concatenate((Cdata, con_data))
-            Glabel, Clabel = np.concatenate((Glabel, gen_label)), np.concatenate((Clabel, con_label))
-    exit()
-    # Gndata = func._norm(Gdata)
-    # Cndata = func._norm(Cdata)
+        gen_data_n = func._norm(gen_data)
+        con_data_n = func._norm(con_data)
+
+        Gdata.append(gen_data_n)
+        Cdata.append(con_data_n)
+        Glabel.append(gen_label)
+        Clabel.append(con_label)
+        # if i==0:
+        #     Gdata, Cdata = gen_data, con_data
+        #     Glabel, Clabel = gen_label, con_label
+        # else:
+        #     Gdata, Cdata = np.concatenate((Gdata, gen_data)), np.concatenate((Cdata, con_data))
+        #     Glabel, Clabel = np.concatenate((Glabel, gen_label)), np.concatenate((Clabel, con_label))
+    
+    Gndata = np.vstack(Gdata)
+    Cndata = np.vstack(Cdata)
+    Glabel = np.vstack(Glabel)
+    Clabel = np.vstack(Clabel)    
+    
     Gmodel = linear_model.Lasso(alpha=1e-2, positive=True)
     Cmodel = linear_model.ElasticNet(alpha=1e-4, positive=True) 
     Gmodel.fit(Gdata, Glabel)

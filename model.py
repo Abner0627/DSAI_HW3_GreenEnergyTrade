@@ -47,6 +47,34 @@ class m01(nn.Module):
         y_con = self.FC_con(xtt)
         return y_gen, y_con
 
+class MyModel(keras.Model):
+
+    def __init__(self):
+        super(MyModel, self).__init__()
+
+        self.layer = keras.Sequential([
+            keras.layers.Conv2D(filters=6, kernel_size=(5, 5)),
+            keras.layers.Activation(tf.nn.sigmoid),
+            keras.layers.AveragePooling2D(pool_size=(
+                2, 2), strides=(2, 2), padding='valid'),
+            keras.layers.Conv2D(filters=6, kernel_size=(5, 5)),
+            keras.layers.Activation(tf.nn.sigmoid),
+            keras.layers.AveragePooling2D(pool_size=(
+                2, 2), strides=(2, 2), padding='valid'),
+
+            keras.layers.Flatten(),
+            keras.layers.Dense(120),
+            keras.layers.Activation(tf.nn.sigmoid),
+            keras.layers.Dense(84),
+            keras.layers.Activation(tf.nn.sigmoid),
+            keras.layers.Dense(43)
+        ])
+
+    def call(self, inputs):
+        x = self.layer(inputs)
+
+        return x
+
 #%% Test
 if __name__ == "__main__":
     IN = torch.randn(32,7,2)
