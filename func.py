@@ -24,3 +24,18 @@ def _nor(x, x_mean=None, x_std=None, train=False):
     else:
         x_nor = (x-x_mean) / x_std
     return x_nor, x_mean, x_std
+
+def _comp(GVal, CVal):
+    if GVal>CVal:
+        # In
+        num = GVal - CVal
+        act = -1
+    elif GVal<CVal:
+        # OUt
+        num = CVal - GVal 
+        act = 1
+    else:
+        num = 0
+        act = 0
+    return num, act
+

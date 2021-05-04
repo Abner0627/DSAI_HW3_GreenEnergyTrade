@@ -1,5 +1,5 @@
 
-# You should not modify this part.
+#%% You should not modify this part.
 def config():
     import argparse
 
@@ -8,7 +8,7 @@ def config():
     parser.add_argument("--generation", default="./sample_data/generation.csv", help="input the generation data path")
     parser.add_argument("--bidresult", default="./sample_data/bidresult.csv", help="input the bids result path")
     parser.add_argument("--train", default=False, help="training model or not")
-    parser.add_argument("--valid", default=True, help="training model or not")
+    parser.add_argument("--valid", default=False, help="training model or not")
     parser.add_argument("--output", default="output.csv", help="output the bids path")
 
     return parser.parse_args()
@@ -55,7 +55,7 @@ if args.train:
     joblib.dump(Cmodel, 'Cmodel')
 
 elif args.valid:
-    #%% val pred
+#%% val pred
     Gmodel = joblib.load('Gmodel')
     Cmodel = joblib.load('Cmodel')
 
@@ -86,7 +86,7 @@ elif args.valid:
         np.save(f, Cmu)
         np.save(f, Cstd)              
 
-    #%%
+#%%
     fig, ax = plt.subplots(1, 1, figsize = (15,5))
     ax.plot(Gpred, color='dodgerblue', label='Pred')
     ax.plot(GVlabel, color='darkorange', label='Label')
@@ -103,7 +103,7 @@ elif args.valid:
     plt.show()
 
 else:
-    #%% val pred
+#%% tes pred
     Gmodel = joblib.load('Gmodel')
     Cmodel = joblib.load('Cmodel')
 
@@ -119,6 +119,8 @@ else:
     CVal = np.array(pd.read_csv(args.consumption, header=None))[1:8,1:]
     CVal = np.stack(CVal).astype(None)[:,0]   
     CVal = CVal[np.newaxis, :]
+
+    Bid = np.array(pd.read_csv(args.bidresult, header=None))
 
     GnVdata, _, _ = func._nor(GVal, Gmu, Gstd)
     CnVdata, _, _ = func._nor(CVal, Cmu, Cstd)
@@ -142,3 +144,4 @@ if __name__ == "__main__":
             ["2018-01-01 01:00:00", "sell", 3, 5]]
     output(args.output, data)
 '''
+# %%
