@@ -61,8 +61,8 @@ if args.train:
     Cmodel = model.m01(24)
     optim = keras.optimizers.Adam(learning_rate=1e-4)
 
-    Gmodel.compile(optimizer=optim, loss=keras.losses.mean_squared_error())
-    Cmodel.compile(optimizer=optim, loss=keras.losses.mean_squared_error())
+    Gmodel.compile(optimizer=optim, loss='mse')
+    Cmodel.compile(optimizer=optim, loss='mse')
 
     Gmodel.fit(Gndata, Glabel, batch_size=32, epochs=30, verbose=2, shuffle=True)
     Cmodel.fit(Cndata, Clabel, batch_size=32, epochs=30, verbose=2, shuffle=True)
