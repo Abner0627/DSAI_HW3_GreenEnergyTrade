@@ -27,10 +27,9 @@ class m01(keras.Model):
         ])
 
     def call(self, x):
-        bz = x.shape[0]
-        x = tf.reshape(x, (bz,7,-1))
+        x = tf.reshape(x, (-1, 7, 24))
         y1 = self.GRU(x)
-        y1 = tf.reshape(y1, (bz,-1,1))
+        y1 = tf.reshape(y1, (-1, 24, 1))
         y2 = self.Cv(y1)
         y = self.FC(y2)
         return y
