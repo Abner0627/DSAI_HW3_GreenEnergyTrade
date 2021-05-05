@@ -15,23 +15,15 @@ def config():
 args = config()
 
 #%% Packages
+seed_v = 25
 import numpy as np
 import pandas as pd
 import os
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 import matplotlib.pyplot as plt
-import joblib
 import tensorflow.keras as keras
-import tensorflow.random as tf_random
-import random
 import func
 import model
-
-def setup_seed(seed_value):
-    np.random.seed(seed_value)
-    tf_random.set_seed(seed_value)
-    random.seed(seed_value)
-
-setup_seed(25)
 
 #%% Load
 if args.train:
@@ -53,20 +45,14 @@ if args.train:
         Cdata.append(con_data_n)
         Glabel.append(gen_label)
         Clabel.append(con_label)
-        # if i==0:
-        #     Gdata, Cdata = gen_data, con_data
-        #     Glabel, Clabel = gen_label, con_label
-        # else:
-        #     Gdata, Cdata = np.concatenate((Gdata, gen_data)), np.concatenate((Cdata, con_data))
-        #     Glabel, Clabel = np.concatenate((Glabel, gen_label)), np.concatenate((Clabel, con_label))
     
     Gndata = np.vstack(Gdata)
     Cndata = np.vstack(Cdata)
     Glabel = np.vstack(Glabel)
     Clabel = np.vstack(Clabel)    
     
-    Gmodel = model.m01(24)
-    Cmodel = model.m01(24)
+    Gmodel = model.m02(128)
+    Cmodel = model.m02(128)
     optim_G = keras.optimizers.Adam(learning_rate=1e-3)
     optim_C = keras.optimizers.Adam(learning_rate=1e-3)
 
@@ -83,20 +69,28 @@ if args.train:
     Gmodel.save('Gmodel')
     Cmodel.save('Cmodel')
 
+    with open('loss.npy', 'wb') as f:          
+        np.save(f, loss_G)
+        np.save(f, loss_C)
+
 else:
 #%% val pred
-    Gmodel = joblib.load('Gmodel')
-    Cmodel = joblib.load('Cmodel')
-    
-    GVal = np.array(pd.read_csv(args.generation, header=None))[1:,1:]
+    Gmodel = keras.models.load_model('Gmodel')
+    Cmodel = keras.models.load_model('Cmodel')
+    # G_path = args.generation
+    # C_path = args.consumption
+    G_path = "./sample_data/generation_25.csv"
+    C_path = "./sample_data/consumption_25.csv"   
+    GVal = np.array(pd.read_csv(G_path, header=None))[1:,1:]
     GVal = np.stack(GVal).astype(None)[:,0]
-    CVal = np.array(pd.read_csv(args.consumption, header=None))[1:,1:]
-    CVal = np.stack(CVal).astype(None)[:,0]    
-    GVdata, CVdata = func._pack(GVal), func._pack(CVal)
-    GVlabel, CVlabel = func._label(GVal), func._label(CVal)
+    CVal = np.array(pd.read_csv(C_path, header=None))[1:,1:]
+    CVal = np.stack(CVal).astype(None)[:,0] 
+    
+    GVdata, CVdata = GVal[:168][np.newaxis, :], CVal[:168][np.newaxis, :]
+    GVlabel, CVlabel = GVal[168:168+24][np.newaxis, :], CVal[168:168+24][np.newaxis, :]
 
-    # GnVdata = func._norm(GVdata)
-    # CnVdata = func._norm(CVdata)
+    GnVdata = func._norm(GVdata)
+    CnVdata = func._norm(CVdata)
 
     Gpred = Gmodel.predict(GVdata)
     Cpred = Cmodel.predict(CVdata)
@@ -104,15 +98,15 @@ else:
 
 #%%
     fig, ax = plt.subplots(1, 1, figsize = (15,5))
-    ax.plot(Gpred, color='dodgerblue', label='Pred')
-    ax.plot(GVlabel, color='darkorange', label='Label')
+    ax.plot(Gpred[0,:], color='dodgerblue', label='Pred')
+    ax.plot(GVlabel[0,:], color='darkorange', label='Label')
     ax.legend(fontsize=10, loc=4)
     plt.title('Generation', fontsize=30) 
     plt.tight_layout()
 
     fig, ax = plt.subplots(1, 1, figsize = (15,5))
-    ax.plot(Cpred, color='dodgerblue', label='Pred')
-    ax.plot(CVlabel, color='darkorange', label='Label')
+    ax.plot(Cpred[0,:], color='dodgerblue', label='Pred')
+    ax.plot(CVlabel[0,:], color='darkorange', label='Label')
     ax.legend(fontsize=10, loc=4)
     plt.title('Consumption', fontsize=30) 
     plt.tight_layout()

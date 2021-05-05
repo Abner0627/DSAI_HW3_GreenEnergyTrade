@@ -1,18 +1,5 @@
 import numpy as np
 
-# def _pack(x, win=7*24):
-#     leng = len(x)
-#     for i in range(leng):
-#         if i+win>leng:
-#             break
-#         else:
-#             wind = (x[i:i+win])[np.newaxis, :]
-#             if i==0:
-#                 out = wind
-#             else:
-#                 out = np.concatenate((out, wind))
-#     return out
-
 def _pack(x, win=7*24):
     out = []
     leng = len(x)
