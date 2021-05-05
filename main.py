@@ -74,9 +74,9 @@ if args.train:
     Cmodel.compile(optimizer=optim_C, loss='mse')
 
     print("=====Gmodel=====")
-    history_G = Gmodel.fit(Gndata, Glabel, batch_size=32, epochs=30, verbose=2, shuffle=True)
+    history_G = Gmodel.fit(Gndata, Glabel, batch_size=32, epochs=40, verbose=2, shuffle=True)
     print("=====Cmodel=====")
-    history_C = Cmodel.fit(Cndata, Clabel, batch_size=32, epochs=30, verbose=2, shuffle=True)
+    history_C = Cmodel.fit(Cndata, Clabel, batch_size=32, epochs=40, verbose=2, shuffle=True)
     loss_G = np.array(history_G.history['loss'])
     loss_C = np.array(history_C.history['loss'])
 
