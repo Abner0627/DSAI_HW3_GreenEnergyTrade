@@ -1,5 +1,5 @@
 import os
-os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3' 
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2' 
 import tensorflow as tf
 from tensorflow import keras
 from tensorflow.keras import layers
@@ -49,12 +49,12 @@ def test_data(name: str):
     data = df[name].values
     length = len(df.index)
 
-    test_x = np.zeros([length - 8*24 + 1, 24, 7])
-    test_y = np.zeros([length - 8*24 + 1, 24, 7])
+    test_x = np.zeros([1, 24, 7])
+    test_y = np.zeros([1, 24, 1])
 
-    for i in range(length - 8*24 + 1):
-        test_x[i, :, :] = data[i:i+7*24].reshape(1, 24, 7)
-        test_y[i, :, :] = data[i+7*24:i+8*24].reshape(1, 24, 1)
+    
+    test_x = data.reshape(1, 24, 7)
+    # test_y[i, :, :] = data[i+7*24:i+8*24].reshape(1, 24, 1)
 
     return test_x, test_y
 
@@ -89,29 +89,30 @@ model.compile(
 
 
 model.fit(
-    train_x, train_y, batch_size=512, epochs=10, verbose=1, shuffle=True
+    train_x, train_y, batch_size=512, epochs=1, verbose=1, shuffle=True
 )
   
 
 #################################################################################
 # TEST
-model.reset_states()
 
-predictions = []
-expecteds = []
-for i in range(len('')):
-    # make one-step forecast
-    X = test_x[i]
-    X = X.reshape(1, 7, 24)
-    yhat = model.predict(X)[0,0]
-    
-    # store forecast
-    predictions.append(yhat)
-    expecteds.append(test_y[i,0])
-    
 
+yhat = model.predict(train_x[-1:])
+plt.plot(yhat.flatten())
+plt.plot(train_y[-1].flatten(), '--')
+plt.show()
+exit()
+
+
+
+yhat = model.predict(test_x)
+
+print(yhat.shape)
+
+
+predictions = yhat.flatten()
 
 
 plt.plot(predictions)
-plt.plot(expecteds, '--')
+# plt.plot(expecteds, '--')
 plt.show()
