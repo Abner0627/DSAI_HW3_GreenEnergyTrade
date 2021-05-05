@@ -21,9 +21,17 @@ import os
 import matplotlib.pyplot as plt
 import joblib
 import tensorflow.keras as keras
+import tensorflow.random as tf_random
+import random
 import func
 import model
 
+def setup_seed(seed_value):
+    np.random.seed(seed_value)
+    tf_random.set_seed(seed_value)
+    random.seed(seed_value)
+
+setup_seed(25)
 
 #%% Load
 if args.train:
@@ -59,15 +67,20 @@ if args.train:
     
     Gmodel = model.m01(24)
     Cmodel = model.m01(24)
-    optim = keras.optimizers.Adam(learning_rate=1e-4)
+    optim = keras.optimizers.Adam(learning_rate=1e-3)
 
     Gmodel.compile(optimizer=optim, loss='mse')
     Cmodel.compile(optimizer=optim, loss='mse')
 
-    Gmodel.fit(Gndata, Glabel, batch_size=32, epochs=30, verbose=2, shuffle=True)
-    Cmodel.fit(Cndata, Clabel, batch_size=32, epochs=30, verbose=2, shuffle=True)
+    print("=====Gmodel=====")
+    history_G = Gmodel.fit(Gndata, Glabel, batch_size=32, epochs=30, verbose=2, shuffle=True)
+    print("=====Cmodel=====")
+    history_C = Cmodel.fit(Cndata, Clabel, batch_size=32, epochs=30, verbose=2, shuffle=True)
+    loss_G = np.array(history_G['loss'])
+    loss_C = np.array(history_C['loss'])
 
-
+    Gmodel.save('Gmodel')
+    Cmodel.save('Cmodel')
 
 else:
 #%% val pred
