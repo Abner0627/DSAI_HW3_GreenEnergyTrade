@@ -1,4 +1,6 @@
 import numpy as np
+import datetime
+import pandas as pd
 
 def _pack(x, win=7*24):
     out = []
@@ -9,7 +11,8 @@ def _pack(x, win=7*24):
         else:
             wind = (x[i:i+win])[np.newaxis, :]
             out.append(wind)
-    return np.vstack(out)
+    out = np.vstack(out)
+    return out
 
 def _norm(x, Z=True):
     x_n = np.zeros_like(x)
@@ -24,17 +27,32 @@ def _norm(x, Z=True):
             x_n[i,:] = (x[i,:]-x_mu)/(x_max-x_min)
     return x_n
 
-def _comp(GVal, CVal):
-    if GVal>CVal:
-        # In
-        num = GVal - CVal
-        act = -1
-    elif GVal<CVal:
-        # OUt
-        num = CVal - GVal 
+def _comp(Gpred, Cpred):
+    G = np.sum(Gpred)
+    C = np.sum(Cpred)
+    profit = G - C
+    if profit<0:
         act = 1
+        vol = abs(profit)
+    elif profit>0:
+        act = -1
+        vol = profit
     else:
-        num = 0
         act = 0
-    return num, act
+        vol = 0
+    vol = round(vol, 1)
+    return vol, act
 
+def _output(path, vol, act):
+    date = datetime.datetime.now()+datetime.timedelta(days=1)
+    date = date.strftime("%Y-%m-%d")
+    if act==-1:
+        data = [[date+" 03:00:00", "sell", 2.0, vol-2]]
+    elif act==1:
+        data = [[date+" 03:00:00", "buy", 2.5, vol-2]]
+    else:
+        data = [[date+" 03:00:00", "buy", 0, 0]]
+
+    df = pd.DataFrame(data, columns=["time", "action", "target_price", "target_volume"])
+    df.to_csv(path, index=False)
+    return

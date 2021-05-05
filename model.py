@@ -51,12 +51,41 @@ class m02(keras.Model):
         x = tf.reshape(x, (-1, 7, 24))
         y1 = self.GRU(x)
         y = self.FC(y1)
-        return y        
+        return y 
+
+class m03(keras.Model):
+    def __init__(self, out_sz):
+        super(m03, self).__init__()
+        FL = keras.layers.GRU(out_sz)
+        BL = keras.layers.GRU(out_sz, go_backwards=True)
+        self.GRU = keras.layers.Bidirectional(FL, backward_layer=BL)
+        self.Cv = keras.Sequential([
+            keras.layers.Conv1D(8, kernel_size=7),
+            keras.layers.BatchNormalization(),
+            keras.layers.ReLU(),
+            keras.layers.Conv1D(16, kernel_size=7, dilation_rate=3),
+            keras.layers.BatchNormalization(),
+            keras.layers.ReLU(),    
+            keras.layers.Conv1D(8, kernel_size=1)
+        ])
+        self.FC = keras.Sequential([
+            keras.layers.Flatten(),
+            keras.layers.Dense(128),
+            keras.layers.ReLU(),
+            keras.layers.Dense(24)
+        ])
+
+    def call(self, x):
+        y1 = self.GRU(x)
+        y1 = tf.expand_dims(y1, axis=-1)
+        y2 = self.Cv(y1)
+        y = self.FC(y2)
+        return y               
 
 #%% Test
 if __name__ == "__main__":
-    IN = np.random.rand(32,7*24)
-    F = m02(64)
+    IN = np.random.rand(1,7,24)
+    F = m03(128)
     Gen = F(IN)
     print('Gen >>', Gen.shape)
 
