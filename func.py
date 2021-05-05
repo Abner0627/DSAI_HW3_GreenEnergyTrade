@@ -14,6 +14,23 @@ def _pack(x, win=7*24):
     out = np.vstack(out)
     return out
 
+def _pack2(x, win=7*24):
+    out = []
+    leng = len(x)
+    for i in range(leng):
+        if i==0:
+            r, c = 0, win
+        else:
+            r = i*win+1
+            c = r+win
+        if r>leng or c>leng:
+            break
+        else:
+            wind = (x[r:c])[np.newaxis, :]
+            out.append(wind)
+    out = np.vstack(out)
+    return out    
+
 def _norm(x, Z=True):
     x_n = np.zeros_like(x)
     for i in range(x.shape[0]):

@@ -34,9 +34,9 @@ if args.train:
         data_ag = np.array(pd.read_csv(os.path.join(dpath, data_list[i]), header=None))[1:,1:]
         ag = np.stack(data_ag).astype(None)
         gen, con = ag[:,0], ag[:,1]
-        gen_data, con_data = func._pack(gen)[:-24, :], func._pack(con)[:-24, :]
-        gen_label, con_label = func._pack(gen[7*24:], win=24), func._pack(con[7*24:], win=24)
-
+        gen_data, con_data = func._pack2(gen)[:-24, :], func._pack2(con)[:-24, :]
+        gen_label, con_label = func._pack2(gen[7*24:], win=24), func._pack2(con[7*24:], win=24)
+        exit()
         gen_data_n = func._norm(gen_data)
         con_data_n = func._norm(con_data)
 

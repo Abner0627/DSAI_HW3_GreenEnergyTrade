@@ -22,7 +22,6 @@ import os
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 import matplotlib.pyplot as plt
 import tensorflow.keras as keras
-import tensorflow as tf
 import func
 import model
 
@@ -54,8 +53,8 @@ if args.train:
     
     Gmodel = model.m03(128)
     Cmodel = model.m03(128)
-    optim_G = keras.optimizers.SGD(learning_rate=1e-2, momentum=0.1)
-    optim_C = keras.optimizers.SGD(learning_rate=1e-2, momentum=0.1)
+    optim_G = keras.optimizers.SGD(learning_rate=1e-2, momentum=1e-2)
+    optim_C = keras.optimizers.SGD(learning_rate=1e-2, momentum=1e-2)
 
     Gmodel.compile(optimizer=optim_G, loss=keras.losses.MeanSquaredError())
     Cmodel.compile(optimizer=optim_C, loss=keras.losses.MeanSquaredError())
@@ -67,8 +66,8 @@ if args.train:
     loss_G = np.array(history_G.history['loss'])
     loss_C = np.array(history_C.history['loss'])
 
-    Gmodel.save('Gmodel')
-    Cmodel.save('Cmodel')
+    Gmodel.save('Gmodel.h5')
+    Cmodel.save('Cmodel.h5')
 
     with open('loss.npy', 'wb') as f:          
         np.save(f, loss_G)
@@ -76,8 +75,8 @@ if args.train:
 
 elif args.valid:
 #%% val pred
-    Gmodel = keras.models.load_model('Gmodel')
-    Cmodel = keras.models.load_model('Cmodel')
+    Gmodel = keras.models.load_model('Gmodel.h5')
+    Cmodel = keras.models.load_model('Cmodel.h5')
     # G_path = args.generation
     # C_path = args.consumption
     G_path = "./sample_data/generation_25.csv"
