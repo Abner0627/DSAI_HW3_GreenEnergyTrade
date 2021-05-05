@@ -67,17 +67,18 @@ if args.train:
     
     Gmodel = model.m01(24)
     Cmodel = model.m01(24)
-    optim = keras.optimizers.Adam(learning_rate=1e-3)
+    optim_G = keras.optimizers.Adam(learning_rate=1e-3)
+    optim_C = keras.optimizers.Adam(learning_rate=1e-3)
 
-    Gmodel.compile(optimizer=optim, loss='mse')
-    Cmodel.compile(optimizer=optim, loss='mse')
+    Gmodel.compile(optimizer=optim_G, loss='mse')
+    Cmodel.compile(optimizer=optim_C, loss='mse')
 
     print("=====Gmodel=====")
     history_G = Gmodel.fit(Gndata, Glabel, batch_size=32, epochs=30, verbose=2, shuffle=True)
     print("=====Cmodel=====")
     history_C = Cmodel.fit(Cndata, Clabel, batch_size=32, epochs=30, verbose=2, shuffle=True)
-    loss_G = np.array(history_G['loss'])
-    loss_C = np.array(history_C['loss'])
+    loss_G = np.array(history_G.history['loss'])
+    loss_C = np.array(history_C.history['loss'])
 
     Gmodel.save('Gmodel')
     Cmodel.save('Cmodel')
