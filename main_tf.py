@@ -7,7 +7,7 @@ def config():
     parser.add_argument("--consumption", default="./sample_data/consumption.csv", help="input the consumption data path")
     parser.add_argument("--generation", default="./sample_data/generation.csv", help="input the generation data path")
     parser.add_argument("--bidresult", default="./sample_data/bidresult.csv", help="input the bids result path")
-    parser.add_argument("--train", default=False, help="training model or not")
+    parser.add_argument("--train", default=True, help="training model or not")
     parser.add_argument("--valid", default=False, help="training model or not")
     parser.add_argument("--output", default="output.csv", help="output the bids path")
 
