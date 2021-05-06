@@ -60,9 +60,11 @@ def _comp(Gpred, Cpred):
     vol = round(vol, 1)
     return vol, act
 
-def _output(path, vol, act):
-    date = datetime.datetime.now()+datetime.timedelta(days=1)
+def _output(path, vol, act, date_pre):
+    date_pre = datetime.datetime.strptime(date_pre, "%Y-%m-%d %H:%M:%S")
+    date = date_pre + datetime.timedelta(days=1)
     date = date.strftime("%Y-%m-%d")
+    vol = round(vol,2)
     if act==-1:
         data = [[date+" 03:00:00", "sell", 2.0, vol-2]]
     elif act==1:

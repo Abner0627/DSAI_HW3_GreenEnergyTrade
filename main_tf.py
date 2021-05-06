@@ -7,8 +7,7 @@ def config():
     parser.add_argument("--consumption", default="./sample_data/consumption.csv", help="input the consumption data path")
     parser.add_argument("--generation", default="./sample_data/generation.csv", help="input the generation data path")
     parser.add_argument("--bidresult", default="./sample_data/bidresult.csv", help="input the bids result path")
-    parser.add_argument("--train", default=True, help="training model or not")
-    parser.add_argument("--valid", default=False, help="training model or not")
+    parser.add_argument("--train", default=False, help="training model or not")
     parser.add_argument("--output", default="output.csv", help="output the bids path")
 
     return parser.parse_args()
@@ -20,8 +19,8 @@ import numpy as np
 import pandas as pd
 import os
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
-import matplotlib.pyplot as plt
 import tensorflow.keras as keras
+import time
 import func
 import model
 
@@ -48,16 +47,16 @@ if args.train:
     
     Gndata = np.reshape(np.vstack(Gdata), (-1,7,24))
     Cndata = np.reshape(np.vstack(Cdata), (-1,7,24))
-    Glabel = np.vstack(Glabel)
-    Clabel = np.vstack(Clabel)    
-    
+    Glabel = np.sum(np.vstack(Glabel), axis=-1)[:, np.newaxis]
+    Clabel = np.sum(np.vstack(Clabel), axis=-1)[:, np.newaxis]
+
     Gmodel = model.m03(128)
     Cmodel = model.m03(128)
-    optim_G = keras.optimizers.SGD(learning_rate=1e-2, momentum=1e-2)
-    optim_C = keras.optimizers.SGD(learning_rate=1e-2, momentum=1e-2)
+    optim_G = keras.optimizers.SGD(learning_rate=1e-1)
+    optim_C = keras.optimizers.SGD(learning_rate=1e-1)
 
-    Gmodel.compile(optimizer=optim_G, loss=keras.losses.MeanSquaredError())
-    Cmodel.compile(optimizer=optim_C, loss=keras.losses.MeanSquaredError())
+    Gmodel.compile(optimizer=optim_G, loss=keras.losses.Huber())
+    Cmodel.compile(optimizer=optim_C, loss=keras.losses.Huber())
 
     print("=====Gmodel=====")
     history_G = Gmodel.fit(Gndata, Glabel, batch_size=128, epochs=40, verbose=2, shuffle=True)
@@ -66,17 +65,18 @@ if args.train:
     loss_G = np.array(history_G.history['loss'])
     loss_C = np.array(history_C.history['loss'])
 
-    Gmodel.save('Gmodel.h5')
-    Cmodel.save('Cmodel.h5')
+    Gmodel.save('Gmodel')
+    Cmodel.save('Cmodel')
 
     with open('loss.npy', 'wb') as f:          
         np.save(f, loss_G)
         np.save(f, loss_C)
 
-elif args.valid:
+else:
 #%% val pred
-    Gmodel = keras.models.load_model('Gmodel.h5')
-    Cmodel = keras.models.load_model('Cmodel.h5')
+    tStart = time.time()
+    Gmodel = keras.models.load_model('Gmodel')
+    Cmodel = keras.models.load_model('Cmodel')
     # G_path = args.generation
     # C_path = args.consumption
     G_path = "./sample_data/generation_25.csv"
@@ -87,49 +87,56 @@ elif args.valid:
     CVal = np.stack(CVal).astype(None)[:,0] 
     
     GVdata, CVdata = GVal[:168][np.newaxis, :], CVal[:168][np.newaxis, :]
-    GVlabel, CVlabel = GVal[168:168+24], CVal[168:168+24]
+    GVlabel, CVlabel = np.sum(GVal[168:168+24]), np.sum(CVal[168:168+24])
 
     GnVdata = np.reshape(func._norm(GVdata), (-1,7,24))
     CnVdata = np.reshape(func._norm(CVdata), (-1,7,24))
 
     Gpred = Gmodel.predict(GnVdata)
     Cpred = Cmodel.predict(CnVdata)
-        
+#%%   
+    Gs = (Gpred-GVlabel)**2/2
+    Cs = (Cpred-CVlabel)**2/2
+    print("Gs >> ", Gs)
+    print("Cs >> ", Cs)
+    tEnd = time.time()
+    print ("\n" + "It cost {:.4f} sec" .format(tEnd-tStart))
 
 #%%
-    fig, ax = plt.subplots(1, 1, figsize = (15,5))
-    ax.plot(Gpred[0,:], color='dodgerblue', label='Pred')
-    ax.plot(GVlabel, color='darkorange', label='Label')
-    ax.legend(fontsize=10, loc=4)
-    plt.title('Generation', fontsize=30) 
-    plt.tight_layout()
+    # fig, ax = plt.subplots(1, 1, figsize = (15,5))
+    # ax.plot(Gpred[0,:], color='dodgerblue', label='Pred')
+    # ax.plot(GVlabel, color='darkorange', label='Label')
+    # ax.legend(fontsize=10, loc=4)
+    # plt.title('Generation', fontsize=30) 
+    # plt.tight_layout()
 
-    fig, ax = plt.subplots(1, 1, figsize = (15,5))
-    ax.plot(Cpred[0,:], color='dodgerblue', label='Pred')
-    ax.plot(CVlabel, color='darkorange', label='Label')
-    ax.legend(fontsize=10, loc=4)
-    plt.title('Consumption', fontsize=30) 
-    plt.tight_layout()
-    plt.show()  
+    # fig, ax = plt.subplots(1, 1, figsize = (15,5))
+    # ax.plot(Cpred[0,:], color='dodgerblue', label='Pred')
+    # ax.plot(CVlabel, color='darkorange', label='Label')
+    # ax.legend(fontsize=10, loc=4)
+    # plt.title('Consumption', fontsize=30) 
+    # plt.tight_layout()
+    # plt.show()  
    
-else:
-    Gmodel = keras.models.load_model('Gmodel')
-    Cmodel = keras.models.load_model('Cmodel')
-    G_path = args.generation
-    C_path = args.consumption 
-    GVal = np.array(pd.read_csv(G_path, header=None))[1:,1:]
-    GVal = np.stack(GVal).astype(None)[:,0]
-    CVal = np.array(pd.read_csv(C_path, header=None))[1:,1:]
-    CVal = np.stack(CVal).astype(None)[:,0] 
+# else:
+#     Gmodel = keras.models.load_model('Gmodel')
+#     Cmodel = keras.models.load_model('Cmodel')
+#     G_path = args.generation
+#     C_path = args.consumption 
+#     GVal = np.array(pd.read_csv(G_path, header=None))[1:,1:]
+#     GVal = np.stack(GVal).astype(None)[:,0]
+#     CVal = np.array(pd.read_csv(C_path, header=None))[1:,1:]
+#     CVal = np.stack(CVal).astype(None)[:,0] 
+#     date_pre = np.array(pd.read_csv(C_path, header=None))[1:,-1]
     
-    GVdata, CVdata = GVal[np.newaxis, :], CVal[np.newaxis, :]
-    GVlabel, CVlabel = GVal, CVal
+#     GVdata, CVdata = GVal[np.newaxis, :], CVal[np.newaxis, :]
+#     GVlabel, CVlabel = GVal, CVal
 
-    GnVdata = np.reshape(func._norm(GVdata), (-1,7,24))
-    CnVdata = np.reshape(func._norm(CVdata), (-1,7,24))
+#     GnVdata = np.reshape(func._norm(GVdata), (-1,7,24))
+#     CnVdata = np.reshape(func._norm(CVdata), (-1,7,24))
 
-    Gpred = Gmodel.predict(GnVdata)
-    Cpred = Cmodel.predict(CnVdata)   
+#     Gpred = Gmodel.predict(GnVdata)
+#     Cpred = Cmodel.predict(CnVdata)   
 
-    vol, act = func._comp(Gpred, Cpred)
-    func._output(args.output, vol, act) 
+#     vol, act = func._comp(Gpred, Cpred)
+#     func._output(args.output, vol, act, date_pre) 

@@ -63,7 +63,7 @@ class m03(keras.Model):
             keras.layers.Flatten(),
             keras.layers.Dense(64),
             keras.layers.ReLU(),
-            keras.layers.Dense(24)
+            keras.layers.Dense(1)
         ])
 
     def call(self, x):
