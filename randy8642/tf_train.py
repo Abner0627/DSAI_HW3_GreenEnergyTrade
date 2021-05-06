@@ -40,29 +40,13 @@ def train_data(name: str):
     return train_x, train_y
 
 
-def test_data(name: str):
-    assert name in ['generation', 'consumption'], 'input name not in list'
-
-    testing_data_path = f'./sample_data/{name}.csv'
-
-    df = pd.read_csv(testing_data_path)
-    data = df[name].values
-    length = len(df.index)
-
-    test_x = np.zeros([1, 24, 7])
-    test_y = np.zeros([1, 24, 1])
-
-    
-    test_x = data.reshape(1, 24, 7)
-    # test_y[i, :, :] = data[i+7*24:i+8*24].reshape(1, 24, 1)
-
-    return test_x, test_y
 
 
-name = 'consumption'
+
+name = 'generation'
 
 train_x, train_y = train_data(name)
-test_x, test_y = test_data(name)
+
 
 
 #################################################################################
@@ -89,7 +73,7 @@ model.compile(
 
 
 model.fit(
-    train_x, train_y, batch_size=512, epochs=1, verbose=1, shuffle=True
+    train_x, train_y, batch_size=512, epochs=10, verbose=1, shuffle=True
 )
   
 
@@ -101,18 +85,6 @@ yhat = model.predict(train_x[-1:])
 plt.plot(yhat.flatten())
 plt.plot(train_y[-1].flatten(), '--')
 plt.show()
-exit()
 
+model.save(f"{name}_model.h5")
 
-
-yhat = model.predict(test_x)
-
-print(yhat.shape)
-
-
-predictions = yhat.flatten()
-
-
-plt.plot(predictions)
-# plt.plot(expecteds, '--')
-plt.show()
