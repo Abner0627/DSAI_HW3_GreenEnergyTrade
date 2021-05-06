@@ -54,23 +54,18 @@ yhat = {}
 
 for name in ['consumption', 'generation']:
     # LSTM
-    path = f'{name}_model.h5'
+    path = f'./model_save/{name}_model.h5'
     model = keras.models.load_model(path)
 
-    # test_x, test_y = test_data(name)
-    test_x, test_y = train_data(name)
-    test_x,test_y = test_x[-1:],test_y[-1:]
+    test_x, test_y = test_data(name)
+    # test_x, test_y = train_data(name)
+    # test_x,test_y = test_x[-1:],test_y[-1:]
 
     yhat[name] = model.predict(test_x).flatten()
 
-    # AVG
-    print(test_x.shape)
-    mean = np.mean(test_x, axis=2).reshape(-1)
-    std = np.std(test_x, axis=2).reshape(-1)
-    print(mean, std)
-    plt.plot(mean)
-    plt.show()
-    exit()
+    
+    
+    
 
 # PLOT
 plt.plot(yhat['generation'], label='predict_gen')
