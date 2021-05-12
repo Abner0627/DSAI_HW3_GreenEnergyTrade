@@ -42,7 +42,7 @@ Gpred = Gmodel.predict(GnVdata)
 Cpred = Cmodel.predict(CnVdata)   
 
 vol, act = func._comp(Gpred, Cpred)
-func._output(args.output, vol, act, date_pre)
+func._output(args.output, vol, act, date_pre, Gpred)
 tEnd = time.time()
 print ("\n" + "It cost {:.4f} sec" .format(tEnd-tStart))
 
