@@ -60,6 +60,38 @@ def _comp(Gpred, Cpred):
     vol = round(vol, 1)
     return vol, act
 
+def _comp2(pred):
+    A = []
+    for i in range(24):
+        if pred[:, i]<0:
+            A.append(1)
+        elif pred[:, i]>0:
+            A.append(-1)
+        else:
+            A.append(0)
+    return np.vstack(A)
+
+def _output2(vol, act, date_pre):
+    D = []
+    date_pre = datetime.datetime.strptime(date_pre, "%Y-%m-%d %H:%M:%S")
+    date = date_pre + datetime.timedelta(days=1)
+    date = date.strftime("%Y-%m-%d")
+    trad_v = abs(np.round(vol, 2))
+    ini_time = datetime.datetime.strptime("00:00:00", "%H:%M:%S")
+    for i in range(len(act)):
+        time = ini_time + datetime.timedelta(hours=i)
+        if act[i]==-1:
+            data = [date + " " + str(time.strftime("%H:%M:%S")), "sell", 2.0, float(trad_v[:, i])]
+        elif act[i]==1:
+            data = [date + " " + str(time.strftime("%H:%M:%S")), "buy", 2.2, float(trad_v[:, i])]
+        else:
+            data = [date + " " + str(time.strftime("%H:%M:%S")), "buy", 0, 0]
+        D.append(data) 
+      
+    return D
+
+
+
 def _output(path, vol, act, date_pre, Gpred):
     date_pre = datetime.datetime.strptime(date_pre, "%Y-%m-%d %H:%M:%S")
     G = np.sum(Gpred)

@@ -24,6 +24,9 @@ import time
 import func
 import model
 
+def rmse(predictions, targets):
+    return np.sqrt(((predictions - targets) ** 2).mean())
+
 #%% Load
 if args.train:
     dpath = './training_data'
@@ -47,36 +50,29 @@ if args.train:
     
     Gndata = np.reshape(np.vstack(Gdata), (-1,7,24))
     Cndata = np.reshape(np.vstack(Cdata), (-1,7,24))
-    Glabel = np.sum(np.vstack(Glabel), axis=-1)[:, np.newaxis]
-    Clabel = np.sum(np.vstack(Clabel), axis=-1)[:, np.newaxis]
+    ndata = np.concatenate((Gndata, Cndata), axis=1)
+    label = (np.vstack(Glabel) - np.vstack(Clabel))[:, np.newaxis]
+    # Glabel2 = np.sum(np.vstack(Glabel), axis=-1)[:, np.newaxis]
+    # Clabel2 = np.sum(np.vstack(Clabel), axis=-1)[:, np.newaxis]
 
-    Gmodel = model.m03(128)
-    Cmodel = model.m03(128)
-    optim_G = keras.optimizers.SGD(learning_rate=1e-1)
-    optim_C = keras.optimizers.SGD(learning_rate=1e-1)
+    model = model.m04(128)
+    optim = keras.optimizers.SGD(learning_rate=1e-1)
+    model.compile(optimizer=optim, loss=keras.losses.Huber())
 
-    Gmodel.compile(optimizer=optim_G, loss=keras.losses.Huber())
-    Cmodel.compile(optimizer=optim_C, loss=keras.losses.Huber())
+    print("=====model=====")
+    history = model.fit(ndata, label, batch_size=128, epochs=40, verbose=2, shuffle=True)
+    loss = np.array(history.history['loss'])
 
-    print("=====Gmodel=====")
-    history_G = Gmodel.fit(Gndata, Glabel, batch_size=128, epochs=40, verbose=2, shuffle=True)
-    print("=====Cmodel=====")
-    history_C = Cmodel.fit(Cndata, Clabel, batch_size=128, epochs=40, verbose=2, shuffle=True)
-    loss_G = np.array(history_G.history['loss'])
-    loss_C = np.array(history_C.history['loss'])
-
-    Gmodel.save('Gmodel')
-    Cmodel.save('Cmodel')
+    model.save('model')
 
     with open('loss.npy', 'wb') as f:          
-        np.save(f, loss_G)
-        np.save(f, loss_C)
+        np.save(f, loss)
 
 else:
 #%% val pred
     tStart = time.time()
-    Gmodel = keras.models.load_model('Gmodel')
-    Cmodel = keras.models.load_model('Cmodel')
+    model = keras.models.load_model('model')
+    # Cmodel = keras.models.load_model('Cmodel')
     # G_path = args.generation
     # C_path = args.consumption
     G_path = "./sample_data/generation_25.csv"
@@ -85,20 +81,18 @@ else:
     GVal = np.stack(GVal).astype(None)[:,0]
     CVal = np.array(pd.read_csv(C_path, header=None))[1:,1:]
     CVal = np.stack(CVal).astype(None)[:,0] 
-    
-    GVdata, CVdata = GVal[:168][np.newaxis, :], CVal[:168][np.newaxis, :]
-    GVlabel, CVlabel = np.sum(GVal[168:168+24]), np.sum(CVal[168:168+24])
 
+    GVdata, CVdata = GVal[:168][np.newaxis, :], CVal[:168][np.newaxis, :]
+    label = GVal[168:168+24] - CVal[168:168+24]
+    # GVlabel, CVlabel = np.sum(GVal[168:168+24]), np.sum(CVal[168:168+24])
     GnVdata = np.reshape(func._norm(GVdata), (-1,7,24))
     CnVdata = np.reshape(func._norm(CVdata), (-1,7,24))
+    nVdata = np.concatenate((GnVdata, CnVdata), axis=1)
 
-    Gpred = Gmodel.predict(GnVdata)
-    Cpred = Cmodel.predict(CnVdata)
+    pred = model.predict(nVdata)
 #%%   
-    Gs = (Gpred-GVlabel)**2/2
-    Cs = (Cpred-CVlabel)**2/2
-    print("Gs >> ", Gs)
-    print("Cs >> ", Cs)
+    Gs = rmse(pred, label)
+    print("RMSE >> ", Gs)
     tEnd = time.time()
     print ("\n" + "It cost {:.4f} sec" .format(tEnd-tStart))
 

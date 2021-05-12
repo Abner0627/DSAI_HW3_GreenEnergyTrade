@@ -18,12 +18,11 @@ args = config()
 import numpy as np
 import pandas as pd
 import os
-os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
-import tensorflow.keras as keras
+import joblib
+from sklearn import linear_model
 import func
 
-Gmodel = keras.models.load_model('Gmodel')
-Cmodel = keras.models.load_model('Cmodel')
+model = joblib.load('model')
 G_path = args.generation
 C_path = args.consumption 
 GVal = np.array(pd.read_csv(G_path, header=None))[1:,1:]
@@ -33,16 +32,14 @@ CVal = np.stack(CVal).astype(None)[:,0]
 date_pre = np.array(pd.read_csv(C_path, header=None))[-1,0]
 
 GVdata, CVdata = GVal[np.newaxis, :], CVal[np.newaxis, :]
-GVlabel, CVlabel = GVal, CVal
+nVdata = np.concatenate((GVdata, CVdata), axis=1)
 
-GnVdata = np.reshape(func._norm(GVdata), (-1,7,24))
-CnVdata = np.reshape(func._norm(CVdata), (-1,7,24))
+pred = model.predict(nVdata) 
 
-Gpred = Gmodel.predict(GnVdata)
-Cpred = Cmodel.predict(CnVdata)   
-
-vol, act = func._comp(Gpred, Cpred)
-func._output(args.output, vol, act, date_pre, Gpred)
+act = func._comp2(pred)
+D = func._output2(pred, act, date_pre)
+df = pd.DataFrame(D, columns=["time", "action", "target_price", "target_volume"])
+df.to_csv(args.output, index=False)
 tEnd = time.time()
 print ("\n" + "It cost {:.4f} sec" .format(tEnd-tStart))
 
