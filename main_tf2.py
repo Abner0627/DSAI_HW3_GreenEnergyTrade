@@ -1,3 +1,4 @@
+
 #%% You should not modify this part.
 def config():
     import argparse
@@ -12,7 +13,6 @@ def config():
     return parser.parse_args()
 
 args = config()
-
 
 #%% Packages
 import numpy as np

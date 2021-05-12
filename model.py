@@ -1,6 +1,6 @@
 #%% Import packages
 import os
-# os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 # import tensorflow as tf
 import tensorflow.keras as keras
 import numpy as np
@@ -69,12 +69,30 @@ class m03(keras.Model):
     def call(self, x):
         y1 = self.GRU(x)
         y = self.FC(y1)
-        return y               
+        return y   
+
+class m04(keras.Model):
+    def __init__(self, out_sz):
+        super(m04, self).__init__()
+        FL = keras.layers.GRU(out_sz)
+        BL = keras.layers.GRU(out_sz, go_backwards=True)
+        self.GRU = keras.layers.Bidirectional(FL, backward_layer=BL)
+        self.FC = keras.Sequential([
+            keras.layers.Flatten(),
+            keras.layers.Dense(64),
+            keras.layers.ReLU(),
+            keras.layers.Dense(24)
+        ])
+
+    def call(self, x):
+        y1 = self.GRU(x)
+        y = self.FC(y1)
+        return y              
 
 #%% Test
 if __name__ == "__main__":
-    IN = np.random.rand(1,7,24)
-    F = m03(128)
+    IN = np.random.rand(1,14,24)
+    F = m04(128)
     Gen = F(IN)
     print('Gen >>', Gen.shape)
 
