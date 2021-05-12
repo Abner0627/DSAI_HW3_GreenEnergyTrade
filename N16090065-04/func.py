@@ -66,17 +66,15 @@ def _output(path, vol, act, date_pre, Gpred):
     date = date_pre + datetime.timedelta(days=1)
     date = date.strftime("%Y-%m-%d")
 
-    sell_v = round(G-5, 2)
-    trad_v = round(vol-2, 2)
+    trad_v = round(vol, 2)
 
-    if sell_v<0 or trad_v<0:
-        sell_v, trad_v = 0, 0
+    if trad_v<0:
+        trad_v = 0
     
     if act==-1:
         data = [[date+" 03:00:00", "sell", 2.0, trad_v]]
     elif act==1:
-        data = [[date+" 03:00:00", "buy", 2.3, trad_v]]
-        data = [[date+" 03:00:00", "sell", 3.5, sell_v]]
+        data = [[date+" 03:00:00", "buy", 2.2, trad_v]]
     else:
         data = [[date+" 03:00:00", "buy", 0, 0]]
 

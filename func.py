@@ -60,14 +60,21 @@ def _comp(Gpred, Cpred):
     vol = round(vol, 1)
     return vol, act
 
-def _output(path, vol, act, date_pre):
+def _output(path, vol, act, date_pre, Gpred):
     date_pre = datetime.datetime.strptime(date_pre, "%Y-%m-%d %H:%M:%S")
+    G = np.sum(Gpred)
     date = date_pre + datetime.timedelta(days=1)
     date = date.strftime("%Y-%m-%d")
+
+    trad_v = round(vol, 2)
+
+    if trad_v<0:
+        trad_v = 0
+    
     if act==-1:
-        data = [[date+" 03:00:00", "sell", 2.0, round(vol-2, 2)]]
+        data = [[date+" 03:00:00", "sell", 2.0, trad_v]]
     elif act==1:
-        data = [[date+" 03:00:00", "buy", 2.5, round(vol-2, 2)]]
+        data = [[date+" 03:00:00", "buy", 2.2, trad_v]]
     else:
         data = [[date+" 03:00:00", "buy", 0, 0]]
 
