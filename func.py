@@ -34,14 +34,15 @@ def _pack2(x, win=7*24):
 def _norm(x, Z=True):
     x_n = np.zeros_like(x)
     for i in range(x.shape[0]):
-        x_mu = np.mean(x[i,:], axis=0)
+        xs = x[i,:]
+        x_mu = np.mean(xs)
         if Z:
-            x_std = np.std(x[i,:], axis=0)
-            x_n[i,:] = (x[i,:]-x_mu)/x_std
+            x_std = np.std(xs)
+            x_n[i,:] = (xs-x_mu)/x_std
         else:
-            x_min = np.min(x[i,:], axis=0)
-            x_max = np.max(x[i,:], axis=0)
-            x_n[i,:] = (x[i,:]-x_mu)/(x_max-x_min)
+            x_min = np.min(xs)
+            x_max = np.max(xs)
+            x_n[i,:] = (xs-x_mu)/(x_max-x_min)
     return x_n
 
 def _comp(Gpred, Cpred):

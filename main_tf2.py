@@ -31,7 +31,7 @@ def rmse(predictions, targets):
 if args.train:
     dpath = './training_data'
     data_list = os.listdir(dpath)
-    Gdata, Cdata, Glabel, Clabel = [], [], [], []
+    Ndata, Nlabel = [], []
     for i in range(len(data_list)):
     # i=0
         data_ag = np.array(pd.read_csv(os.path.join(dpath, data_list[i]), header=None))[1:,1:]
@@ -40,27 +40,24 @@ if args.train:
         gen_data, con_data = func._pack(gen)[:-24, :], func._pack(con)[:-24, :]
         gen_label, con_label = func._pack(gen[7*24:], win=24), func._pack(con[7*24:], win=24)
 
-        gen_data_n = func._norm(gen_data)
-        con_data_n = func._norm(con_data)
+        t_data = np.concatenate((gen_data, con_data), axis=-1)
+        t_data_n = func._norm(t_data)
+        t_label = gen_label - con_label
 
-        Gdata.append(gen_data_n)
-        Cdata.append(con_data_n)
-        Glabel.append(gen_label)
-        Clabel.append(con_label)
+        Ndata.append(t_data_n)
+        Nlabel.append(t_label)
     
-    Gndata = np.reshape(np.vstack(Gdata), (-1,7,24))
-    Cndata = np.reshape(np.vstack(Cdata), (-1,7,24))
-    ndata = np.concatenate((Gndata, Cndata), axis=1)
-    label = (np.vstack(Glabel) - np.vstack(Clabel))[:, np.newaxis]
+    ndata = np.reshape(np.vstack(Ndata), (-1,7,48))
+    label = np.vstack(Nlabel)
     # Glabel2 = np.sum(np.vstack(Glabel), axis=-1)[:, np.newaxis]
     # Clabel2 = np.sum(np.vstack(Clabel), axis=-1)[:, np.newaxis]
 
     model = model.m04(128)
     optim = keras.optimizers.SGD(learning_rate=1e-1)
-    model.compile(optimizer=optim, loss=keras.losses.Huber())
+    model.compile(optimizer=optim, loss=keras.losses.MeanSquaredError())
 
     print("=====model=====")
-    history = model.fit(ndata, label, batch_size=128, epochs=40, verbose=2, shuffle=True)
+    history = model.fit(ndata, label, batch_size=32, epochs=40, verbose=2, shuffle=True)
     loss = np.array(history.history['loss'])
 
     model.save('model')
@@ -85,9 +82,8 @@ else:
     GVdata, CVdata = GVal[:168][np.newaxis, :], CVal[:168][np.newaxis, :]
     label = GVal[168:168+24] - CVal[168:168+24]
     # GVlabel, CVlabel = np.sum(GVal[168:168+24]), np.sum(CVal[168:168+24])
-    GnVdata = np.reshape(func._norm(GVdata), (-1,7,24))
-    CnVdata = np.reshape(func._norm(CVdata), (-1,7,24))
-    nVdata = np.concatenate((GnVdata, CnVdata), axis=1)
+    tVdata = np.concatenate((GVdata, CVdata), axis=-1)
+    nVdata = np.reshape(func._norm(tVdata), (-1,7,48))
 
     pred = model.predict(nVdata)
 #%%   
@@ -126,8 +122,8 @@ else:
 #     GVdata, CVdata = GVal[np.newaxis, :], CVal[np.newaxis, :]
 #     GVlabel, CVlabel = GVal, CVal
 
-#     GnVdata = np.reshape(func._norm(GVdata), (-1,7,24))
-#     CnVdata = np.reshape(func._norm(CVdata), (-1,7,24))
+#     GnVdata = np.reshape((GVdata), (-1,7,24))
+#     CnVdata = np.reshape((CVdata), (-1,7,24))
 
 #     Gpred = Gmodel.predict(GnVdata)
 #     Cpred = Cmodel.predict(CnVdata)   
