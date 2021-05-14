@@ -116,8 +116,9 @@ def _output(path, vol, act, date_pre, Gpred):
     return
 
 def _bid(path):
-    A = np.array(pd.read_csv(path, header=None))
-    return A
+    A = pd.read_csv(path, header=None)
+    B = A[A['action']=='buy']
+    return B
 
 #%% Test
 if __name__ == "__main__":
