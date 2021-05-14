@@ -116,7 +116,7 @@ def _output(path, vol, act, date_pre, Gpred):
     return
 
 def _bid(path):
-    A = np.array(pd.read_csv(path), header=None))
+    A = np.array(pd.read_csv(path, header=None))
     return A
 
 #%% Test
