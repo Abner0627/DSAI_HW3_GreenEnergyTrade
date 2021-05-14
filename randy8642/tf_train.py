@@ -1,11 +1,11 @@
-import os
-os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2' 
-import tensorflow as tf
-from tensorflow import keras
-from tensorflow.keras import layers
-import matplotlib.pyplot as plt
-import pandas as pd
 import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+from tensorflow.keras import layers
+from tensorflow import keras
+import tensorflow as tf
+import os
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 
 
 #################################################################################
@@ -33,20 +33,15 @@ def train_data(name: str):
                 train_x_target[i, :, :] = data[i:i+7*24].reshape(1, 24, 7)
                 train_y_target[i, :, :] = data[i+7*24:i+8*24].reshape(1, 24, 1)
 
-
             train_x = np.concatenate((train_x, train_x_target), axis=0)
             train_y = np.concatenate((train_y, train_y_target), axis=0)
 
     return train_x, train_y
 
 
-
-
-
-name = 'generation'
+name = 'consumption'
 
 train_x, train_y = train_data(name)
-
 
 
 #################################################################################
@@ -54,7 +49,8 @@ train_x, train_y = train_data(name)
 
 model = keras.Sequential()
 
-model.add(layers.Bidirectional(layers.LSTM(256, return_sequences=True), merge_mode='concat'))
+model.add(layers.Bidirectional(layers.LSTM(
+    256, return_sequences=True), merge_mode='concat'))
 model.add(layers.Dense(12))
 model.add(layers.Dense(1))
 
@@ -71,20 +67,24 @@ model.compile(
 )
 
 
-
 model.fit(
     train_x, train_y, batch_size=512, epochs=10, verbose=1, shuffle=True
 )
-  
+
 
 #################################################################################
 # TEST
 
 
 yhat = model.predict(train_x[-1:])
-plt.plot(yhat.flatten())
-plt.plot(train_y[-1].flatten(), '--')
+
+plt.title(f'{name} 0-24hr')
+
+plt.plot(yhat.flatten(), '-', label='predict')
+plt.plot(train_y[-1].flatten(), '--', label='real')
+
+plt.xticks(ticks=range(24), labels=[f'{i+1}' for i in range(24)])
+plt.legend(loc=1)
 plt.show()
 
 model.save(f"{name}_model.h5")
-
