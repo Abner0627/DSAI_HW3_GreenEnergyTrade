@@ -114,3 +114,12 @@ def _output(path, vol, act, date_pre, Gpred):
     df = pd.DataFrame(data, columns=["time", "action", "target_price", "target_volume"])
     df.to_csv(path, index=False)
     return
+
+def _bid(path):
+    A = np.array(pd.read_csv(path), header=None))
+    return A
+
+#%% Test
+if __name__ == "__main__":
+    path = "C:\Users\Abner\Desktop\N16090065\bidresult-62.csv"
+    A = _bid(path)
