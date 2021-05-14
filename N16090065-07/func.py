@@ -147,9 +147,9 @@ def _bid(path, Cnpy):
         out_sell = np.load(f)   
 
     A = np.array(pd.read_csv(path, header=None))
-    val = float(A[1,2])
+    val = len(A)
 
-    if np.isnan(val):
+    if val==1:
         print('init')
         out_buy = 2.2
         out_sell = 2
@@ -187,6 +187,6 @@ def _bid(path, Cnpy):
 
 #%% Test
 if __name__ == "__main__":
-    path = "./sample_data/bidresult-64.csv"
+    path = "../sample_data/bidresult-0.csv"
     Cnpy = 'cost.npy'
     out_buy, out_sell = _bid(path, Cnpy)
