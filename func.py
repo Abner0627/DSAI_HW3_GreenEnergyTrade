@@ -121,5 +121,5 @@ def _bid(path):
 
 #%% Test
 if __name__ == "__main__":
-    path = "C:\Users\Abner\Desktop\N16090065\bidresult-62.csv"
+    path = "./sample_data/bidresult-62.csv"
     A = _bid(path)
