@@ -32,13 +32,19 @@ CVal = np.stack(CVal).astype(None)[:,0]
 date_pre = np.array(pd.read_csv(C_path, header=None))[-1,0]
 
 GVdata, CVdata = GVal[np.newaxis, :], CVal[np.newaxis, :]
-tVdata = np.concatenate((GVdata, CVdata), axis=-1)
-nVdata = func._norm(tVdata)
+nVdata = np.concatenate((GVdata, CVdata), axis=1)
 
 pred = model.predict(nVdata) 
 
+path = args.bidresult
+out_buy, out_sell = func._bid(path, 'cost.npy')
 act = func._comp2(pred)
-D = func._output2(pred, act, date_pre)
+D = func._output3(pred, act, date_pre, out_buy, out_sell)
+
+with open('cost.npy', 'wb') as f:
+    np.save(f, out_buy)
+    np.save(f, out_sell)
+
 df = pd.DataFrame(D, columns=["time", "action", "target_price", "target_volume"])
 df.to_csv(args.output, index=False)
 tEnd = time.time()

@@ -31,7 +31,7 @@ if args.train:
     tStart = time.time()
     dpath = './training_data'
     data_list = os.listdir(dpath)
-    Ndata, Nlabel = [], []
+    Gdata, Cdata, Glabel, Clabel = [], [], [], []
     for i in range(len(data_list)):
     # i=0
         data_ag = np.array(pd.read_csv(os.path.join(dpath, data_list[i]), header=None))[1:,1:]
@@ -40,18 +40,18 @@ if args.train:
         gen_data, con_data = func._pack(gen)[:-24, :], func._pack(con)[:-24, :]
         gen_label, con_label = func._pack(gen[7*24:], win=24), func._pack(con[7*24:], win=24)
 
-        t_data = np.concatenate((gen_data, con_data), axis=-1)
-        t_data_n = func._norm(t_data)
-        t_label = gen_label - con_label
-
         # gen_data_n = func._norm(gen_data)
         # con_data_n = func._norm(con_data)
 
-        Ndata.append(t_data_n)
-        Nlabel.append(t_label)
+        Gdata.append(gen_data)
+        Cdata.append(con_data)
+        Glabel.append(gen_label)
+        Clabel.append(con_label)
     
-    ndata = np.vstack(Ndata)
-    label = np.vstack(Nlabel)
+    Gndata = np.vstack(Gdata)
+    Cndata = np.vstack(Cdata)
+    ndata = np.concatenate((Gndata, Cndata), axis=-1)
+    label = (np.vstack(Glabel) - np.vstack(Clabel))
     
     model = linear_model.Lasso(alpha=1e-2)
     model.fit(ndata, label)
@@ -76,8 +76,7 @@ else:
 
     # GnVdata = func._norm(GVdata)
     # CnVdata = func._norm(CVdata)
-    tVdata = np.concatenate((GVdata, CVdata), axis=-1)
-    nVdata = func._norm(tVdata)  
+    nVdata = np.concatenate((GVdata, CVdata), axis=1)
 
     pred = model.predict(nVdata)
 
