@@ -19,6 +19,9 @@ import numpy as np
 import pandas as pd
 import os
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
+os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
+os.environ['CUDA_VISIBLE_DEVICES'] = '0'
+import tensorflow as tf
 import tensorflow.keras as keras
 import time
 import func
@@ -26,6 +29,11 @@ import model
 
 def rmse(predictions, targets):
     return np.sqrt(((predictions - targets) ** 2).mean())
+
+# if tf.test.gpu_device_name():
+#     print('Default GPU Device: {}'.format(tf.test.gpu_device_name()))
+# else:
+#     print("Please install GPU version of TF")
 
 #%% Load
 if args.train:
@@ -57,7 +65,7 @@ if args.train:
     model.compile(optimizer=optim, loss=keras.losses.MeanSquaredError())
 
     print("=====model=====")
-    history = model.fit(ndata, label, batch_size=32, epochs=40, verbose=2, shuffle=True)
+    history = model.fit(ndata, label, batch_size=32, epochs=40, verbose=1, shuffle=True)
     loss = np.array(history.history['loss'])
 
     model.save('model')

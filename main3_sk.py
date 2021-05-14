@@ -18,11 +18,11 @@ args = config()
 import numpy as np
 import pandas as pd
 import os
-os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
-import tensorflow.keras as keras
+import joblib
+from sklearn import linear_model
 import func
 
-model = keras.models.load_model('model')
+model = joblib.load('model')
 G_path = args.generation
 C_path = args.consumption 
 GVal = np.array(pd.read_csv(G_path, header=None))[1:,1:]
@@ -33,7 +33,7 @@ date_pre = np.array(pd.read_csv(C_path, header=None))[-1,0]
 
 GVdata, CVdata = GVal[np.newaxis, :], CVal[np.newaxis, :]
 tVdata = np.concatenate((GVdata, CVdata), axis=-1)
-nVdata = np.reshape(func._norm(tVdata), (-1,7,48))
+nVdata = func._norm(tVdata)
 
 pred = model.predict(nVdata) 
 
