@@ -3,7 +3,7 @@ NCKU DSAI course homework
 
 ## 前置工作
 ### 作業說明
-* 說明連結與交易表單\
+* 說明連結與交易表單
   - [Slide](https://docs.google.com/presentation/d/1JW27_5HXYZhqWmgvDhtXBaFTOfksO_dS/edit#slide=id.p1)
   - [Dashboard](https://docs.google.com/spreadsheets/d/1cjhQewnXT2IbmYkGXRYNC5PlGRafcbVprCjgSFyDAaU/edit?pli=1#gid=0)
 
