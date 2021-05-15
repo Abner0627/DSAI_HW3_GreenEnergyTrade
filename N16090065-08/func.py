@@ -169,7 +169,7 @@ def _bid(path, Cnpy):
             out_sell = out_sell - 0.01
             print("sell bid <5")
         else:
-            out_sell = round(_wavg(sell_trade), 2) 
+            out_sell = round(_wavg(sell_trade), 2) - 0.25
             print("sell avg")     
 
         if out_buy>=2.4:
@@ -187,6 +187,6 @@ def _bid(path, Cnpy):
 
 #%% Test
 if __name__ == "__main__":
-    path = "../sample_data/bidresult-0.csv"
+    path = "../sample_data/bidresult-68.csv"
     Cnpy = 'cost.npy'
     out_buy, out_sell = _bid(path, Cnpy)
