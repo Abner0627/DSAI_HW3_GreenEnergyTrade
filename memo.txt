@@ -1,4 +1,0 @@
-main2_sk & main_sk2 => 05
-main3_sk & main_sk3 => 06
-
-06 edit => 07
